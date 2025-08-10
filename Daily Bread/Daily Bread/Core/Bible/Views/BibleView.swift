@@ -11,35 +11,48 @@ struct BibleView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel = BibleViewModel()
     @State private var showActionButtons: Bool = false
-    
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
                 Color(colorScheme == .light ? .dailyBreadTan : .black)
                     .ignoresSafeArea()
-                
+
                 //Scripture
                 ScrollView {
-                    VStack {
-                        Text("Scripture goes here")
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let verse = viewModel.currentVerse {
+                            Text(verse.text)
+                                .foregroundStyle(colorScheme == .light ? .black : .white)
+                                .padding()
+                        } else {
+                            ProgressView()
+                        }
                     }
                     .offset(y: 75)
                 }
-                
+
                 //View Controls
                 VStack {
                     HStack {
                         Button {
-                            
+
                         } label: {
-                            Text("\(viewModel.book) \(viewModel.chapter)")
+                            Text("\(viewModel.currentVerse?.book ?? "") \(viewModel.currentVerse?.chapter ?? 0)")
                                 .fontWeight(.bold)
                         }
-                        
-                        Button {
-                            
+
+                        Menu {
+                            ForEach(viewModel.versions) { version in
+                                Button(version.abbreviation) {
+                                    Task {
+                                        viewModel.selectedVersion = version.abbreviation
+                                        await viewModel.fetchVerse()
+                                    }
+                                }
+                            }
                         } label: {
-                            Text("\(viewModel.version)")
+                            Text("\(viewModel.selectedVersion.uppercased())")
                                 .fontWeight(.bold)
                         }
                         
@@ -87,6 +100,9 @@ struct BibleView: View {
                     }
                 }
             }
+        }
+        .task {
+            await viewModel.load()
         }
     }
 }

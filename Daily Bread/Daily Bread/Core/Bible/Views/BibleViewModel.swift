@@ -7,52 +7,47 @@
 
 import SwiftUI
 
+@MainActor
 class BibleViewModel: ObservableObject {
-    
-    @Published var version = ""
-    @Published var book: String = ""
-    @Published var chapter: String = ""
-    @Published var verse: String = ""
-    
-    
-    init() {
-        fetchBook()
-        fetchChapter()
-        fetchVerse()
-        fetchVersion()
+
+    /// Abbreviation of the currently selected Bible version
+    @Published var selectedVersion: String = ""
+    /// Verse returned from the API
+    @Published var currentVerse: BibleAPI.Verse?
+    /// Available Bible versions
+    @Published var versions: [BibleVersion] = []
+
+    /// Load initial data by fetching the available versions and first verse
+    func load() async {
+        await fetchVersions()
+        await fetchVerse()
     }
-    
-    func fetchBook() {
-        self.book = "Genesis"
-    }
-    
-    func fetchChapter() {
-        self.chapter = "1"
-    }
-    
-    func fetchVerse() {
-        let urlString = "https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/bibles.json"
-        
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print(error)
-                return
-            }
-            
-            print("Did receive data: \(data)")
-            
-            guard let data = data else { return }
-            print(data)
-            guard let jsonObject = try? JSONSerialization.jsonObject(with: data) else { return }
-            print("JSON \(jsonObject)")
+
+    /// Fetch the verse for the currently selected version
+    func fetchVerse() async {
+        do {
+            let verseData = try await BibleAPI.fetchVerse(
+                version: selectedVersion.isEmpty ? "kjv" : selectedVersion.lowercased(),
+                book: "gen",
+                chapter: 1,
+                verse: 1
+            )
+            currentVerse = verseData
+        } catch {
+            print("Verse fetch failed: \(error)")
         }
-        .resume()
-        self.verse = "12"
     }
-    
-    func fetchVersion() {
-        self.version = "KJV"
+
+    /// Fetch all available Bible versions
+    func fetchVersions() async {
+        do {
+            let fetched = try await BibleAPI.fetchVersions()
+            versions = fetched
+            if selectedVersion.isEmpty, let first = fetched.first {
+                selectedVersion = first.abbreviation
+            }
+        } catch {
+            print("Version fetch failed: \(error)")
+        }
     }
 }
