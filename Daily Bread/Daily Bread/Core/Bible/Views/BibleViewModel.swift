@@ -7,52 +7,45 @@
 
 import SwiftUI
 
+@MainActor
 class BibleViewModel: ObservableObject {
-    
+
     @Published var version = ""
     @Published var book: String = ""
     @Published var chapter: String = ""
     @Published var verse: String = ""
-    
-    
+    @Published var versions: [BibleVersion] = []
+
     init() {
-        fetchBook()
-        fetchChapter()
-        fetchVerse()
-        fetchVersion()
-    }
-    
-    func fetchBook() {
-        self.book = "Genesis"
-    }
-    
-    func fetchChapter() {
-        self.chapter = "1"
-    }
-    
-    func fetchVerse() {
-        let urlString = "https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/bibles.json"
-        
-        guard let url = URL(string: urlString) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print(error)
-                return
-            }
-            
-            print("Did receive data: \(data)")
-            
-            guard let data = data else { return }
-            print(data)
-            guard let jsonObject = try? JSONSerialization.jsonObject(with: data) else { return }
-            print("JSON \(jsonObject)")
+        Task {
+            await fetchVersion()
+            await fetchVerse()
         }
-        .resume()
-        self.verse = "12"
     }
-    
-    func fetchVersion() {
-        self.version = "KJV"
+
+    func fetchVerse() async {
+        do {
+            let verseData = try await BibleAPI.fetchVerse(version: version.lowercased().isEmpty ? "kjv" : version.lowercased(),
+                                                         book: "gen",
+                                                         chapter: 1,
+                                                         verse: 1)
+            book = verseData.book
+            chapter = String(verseData.chapter)
+            verse = verseData.text
+        } catch {
+            print("Verse fetch failed: \(error)")
+        }
+    }
+
+    func fetchVersion() async {
+        do {
+            let fetched = try await BibleAPI.fetchVersions()
+            versions = fetched
+            if let first = fetched.first {
+                version = first.abbreviation
+            }
+        } catch {
+            print("Version fetch failed: \(error)")
+        }
     }
 }
