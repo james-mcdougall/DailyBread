@@ -16,7 +16,7 @@ struct TabBarView: View {
             HomeView()
                 .tabItem {
                     VStack {
-                        Image(systemName: selectedTab == 0 ? "house" : "house.fill")
+                        Image(systemName: "house")
                             .environment(\.symbolVariants, selectedTab == 0 ? .fill : .none)
                         Text("Home")
                     }
@@ -26,7 +26,7 @@ struct TabBarView: View {
             BibleView()
                 .tabItem {
                     VStack {
-                        Image(systemName: selectedTab == 1 ? "book.pages" : "book.pages.fill")
+                        Image(systemName: "book.pages")
                             .environment(\.symbolVariants, selectedTab == 1 ? .fill : .none)
                         Text("Bible")
                     }
@@ -36,7 +36,7 @@ struct TabBarView: View {
             DevotionalView()
                 .tabItem {
                     VStack {
-                        Image(systemName: selectedTab == 2 ? "hands.and.sparkles" : "hands.and.sparkles.fill")
+                        Image(systemName: "hands.and.sparkles")
                             .environment(\.symbolVariants, selectedTab == 2 ? .fill : .none)
                         Text("Devotional")
                     }
@@ -46,8 +46,8 @@ struct TabBarView: View {
             SeekView()
                 .tabItem {
                     VStack {
-                        Image(systemName: selectedTab == 3 ? "magnifyingglass" : "magnifyingglass")
-                            .environment(\.symbolVariants, selectedTab == 2 ? .fill : .none)
+                        Image(systemName: "magnifyingglass")
+                            .environment(\.symbolVariants, selectedTab == 3 ? .fill : .none)
                         Text("Seek")
                     }
                 }
@@ -56,8 +56,8 @@ struct TabBarView: View {
             ProfileView()
                 .tabItem {
                     VStack {
-                        Image(systemName: selectedTab == 4 ? "person" : "person.fill")
-                            .environment(\.symbolVariants, selectedTab == 3 ? .fill : .none)
+                        Image(systemName: "person")
+                            .environment(\.symbolVariants, selectedTab == 4 ? .fill : .none)
                         Text("Profile")
                     }
                 }
