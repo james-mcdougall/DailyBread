@@ -51,4 +51,5 @@ struct BibleSettingsView: View {
 
 #Preview {
     BibleView()
+        .environmentObject(BibleViewModel())
 }

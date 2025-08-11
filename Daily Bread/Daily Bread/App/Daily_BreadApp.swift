@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct Daily_BreadApp: App {
+    @StateObject var bibleViewModel = BibleViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(bibleViewModel)
         }
     }
 }
